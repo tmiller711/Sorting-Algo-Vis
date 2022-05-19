@@ -8,6 +8,7 @@
 // game variables
 int WIN_W = 1000;
 int WIN_H = 600;
+int usernum;
 
 void swap(int *a, int *b)
 {
@@ -16,19 +17,30 @@ void swap(int *a, int *b)
     *b = temp;
 }
 
-void drawrects(SDL_Rect rects[], SDL_Renderer* rend, int usernum)
+void drawrects(SDL_Rect rects[], SDL_Renderer* rend, int i, int j)
 {
-    for (int i = 0; i < usernum; i++)
+    SDL_SetRenderDrawColor(rend, 0, 0, 0 , 255);
+    SDL_RenderClear(rend);
+    for(int k = 0; k < usernum; k++)
     {
         SDL_SetRenderDrawColor(rend, 255, 255, 255, 255);
-        SDL_RenderFillRect(rend, &rects[i]);
-        SDL_SetRenderDrawColor(rend, 0, 0, 0 , 255);
-        //SDL_RenderPresent(rend);
+        SDL_RenderFillRect(rend, &rects[k]);
     }
+    SDL_SetRenderDrawColor(rend, 0, 128, 0, 255);
+    SDL_RenderFillRect(rend, &rects[i - 1]);
+    SDL_SetRenderDrawColor(rend, 255, 0, 0, 255);
+    SDL_RenderFillRect(rend, &rects[j]);
+    SDL_RenderPresent(rend);
 }
+
+void bubblesort(SDL_Rect rects[], SDL_Renderer* rend)
+{
+
+}
+
 // when implementing sorting algorithms they only actually have to sort rects[i].h
 // selection sort, bubble sort, insertion sort
-void selectionsort(SDL_Rect rects[], int usernum, SDL_Renderer* rend)
+void selectionsort(SDL_Rect rects[], SDL_Renderer* rend)
 {
     for (int i = 0; i < usernum-1; i++)
     {
@@ -36,23 +48,12 @@ void selectionsort(SDL_Rect rects[], int usernum, SDL_Renderer* rend)
         int min_idx = i;
         for (int j = i+1; j < usernum; j++)
         {
-            SDL_SetRenderDrawColor(rend, 0, 0, 0 , 255);
-            SDL_RenderClear(rend);
-            for(int k = 0; k < usernum; k++)
-            {
-                SDL_SetRenderDrawColor(rend, 255, 255, 255, 255);
-                SDL_RenderFillRect(rend, &rects[k]);
-            }
-            SDL_SetRenderDrawColor(rend, 0, 128, 0, 255);
-            SDL_RenderFillRect(rend, &rects[i - 1]);
-            SDL_SetRenderDrawColor(rend, 255, 0, 0, 255);
-            SDL_RenderFillRect(rend, &rects[j]);
-            SDL_RenderPresent(rend);
+            drawrects(rects, rend, i, j);
             if (rects[j].h < rects[min_idx].h)
             {
                 min_idx = j;
             }
-            usleep(10000);
+            usleep(5000);
         }
         swap(&rects[min_idx].h, &rects[i].h);
         swap(&rects[min_idx].y, &rects[i].y);
@@ -61,7 +62,7 @@ void selectionsort(SDL_Rect rects[], int usernum, SDL_Renderer* rend)
 
 }
 
-bool check(SDL_Rect rects[], int usernum)
+bool check(SDL_Rect rects[])
 {
     for (int i = 0; i < usernum; i++)
     {
@@ -91,7 +92,7 @@ int main (int argc, char* argv[])
         printf("Usage = ./main NUM SORTTYPE\n");
         return 1;
     }
-    int usernum = atoi(argv[1]);
+    usernum = atoi(argv[1]);
     char* sorttype = argv[2];
     if (usernum%100 != 0)
     {
@@ -148,10 +149,10 @@ int main (int argc, char* argv[])
             printf("seleciton");
             if (strcmp(sorttype, "selection") == 0)
             {
-                selectionsort(rects, usernum, rend);
+                selectionsort(rects, rend);
             }
 
-            if (check(rects, usernum) == false)
+            if (check(rects) == false)
                 printf("Sorting failed with: %s\n", sorttype);
             sort = 0;
         }
