@@ -35,7 +35,19 @@ void drawrects(SDL_Rect rects[], SDL_Renderer* rend, int i, int j)
 
 void bubblesort(SDL_Rect rects[], SDL_Renderer* rend)
 {
-
+    for (int i = 0; i < usernum - 1; i++)
+    {
+        for(int j = 0; j < usernum - i - 1; j++)
+        {
+            if (rects[j].h > rects[j + 1].h)
+            {
+                swap(&rects[j].h, &rects[j + 1].h);
+                swap(&rects[j].y, &rects[j + 1].y);
+            }
+            drawrects(rects, rend, j, j);
+            usleep(10000);
+        }
+    }
 }
 
 // when implementing sorting algorithms they only actually have to sort rects[i].h
@@ -59,7 +71,6 @@ void selectionsort(SDL_Rect rects[], SDL_Renderer* rend)
         swap(&rects[min_idx].y, &rects[i].y);
         usleep(100000);
     }
-
 }
 
 bool check(SDL_Rect rects[])
@@ -144,13 +155,15 @@ int main (int argc, char* argv[])
             }
         }
 
+        SDL_SetRenderDrawColor(rend, 0, 0, 0 , 255);
+        SDL_RenderClear(rend);
+
         if (sort == 1)
         {
-            printf("seleciton");
             if (strcmp(sorttype, "selection") == 0)
-            {
                 selectionsort(rects, rend);
-            }
+            else if (strcmp(sorttype, "bubble") == 0)
+                bubblesort(rects, rend);
 
             if (check(rects) == false)
                 printf("Sorting failed with: %s\n", sorttype);
@@ -163,9 +176,7 @@ int main (int argc, char* argv[])
             SDL_RenderFillRect(rend, &rects[i]);
         }
 
-        SDL_SetRenderDrawColor(rend, 0, 0, 0 , 255);
         SDL_RenderPresent(rend);
-        SDL_RenderClear(rend);
 
         SDL_Delay(1000/60);
     }
