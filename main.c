@@ -4,6 +4,7 @@
 #include <unistd.h>
 #include <time.h>
 #include <SDL2/SDL.h>
+#include <pthread.h>
 
 // game variables
 int WIN_W = 1000;
@@ -96,6 +97,19 @@ void shuffle(SDL_Rect rects[], int n)
     }
 }
 
+void* userexit()
+{
+    SDL_Event event;
+    while (true)
+    {
+        while (SDL_PollEvent(&event))
+        {
+            if (event.type == SDL_QUIT)
+                exit(EXIT_SUCCESS);
+        }
+    }
+}
+
 int main (int argc, char* argv[])
 {
     if (argc != 3)
@@ -158,8 +172,11 @@ int main (int argc, char* argv[])
         SDL_SetRenderDrawColor(rend, 0, 0, 0 , 255);
         SDL_RenderClear(rend);
 
+        pthread_t id;
         if (sort == 1)
         {
+            // create thread that waits for user to exit
+            pthread_create(&id, NULL, userexit, NULL);
             if (strcmp(sorttype, "selection") == 0)
                 selectionsort(rects, rend);
             else if (strcmp(sorttype, "bubble") == 0)
@@ -167,8 +184,10 @@ int main (int argc, char* argv[])
 
             if (check(rects) == false)
                 printf("Sorting failed with: %s\n", sorttype);
+            pthread_join(id, NULL);
             sort = 0;
         }
+
 
         for (int i = 0; i < usernum; i++)
         {
