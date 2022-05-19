@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <unistd.h>
 #include <time.h>
 #include <SDL2/SDL.h>
 
@@ -14,23 +15,48 @@ void swap(int *a, int *b)
     *a = *b;
     *b = temp;
 }
+
+void drawrects(SDL_Rect rects[], SDL_Renderer* rend, int usernum)
+{
+    for (int i = 0; i < usernum; i++)
+    {
+        SDL_SetRenderDrawColor(rend, 255, 255, 255, 255);
+        SDL_RenderFillRect(rend, &rects[i]);
+        SDL_SetRenderDrawColor(rend, 0, 0, 0 , 255);
+        //SDL_RenderPresent(rend);
+    }
+}
 // when implementing sorting algorithms they only actually have to sort rects[i].h
 // selection sort, bubble sort, insertion sort
-void selectionsort(SDL_Rect rects[], int usernum)
+void selectionsort(SDL_Rect rects[], int usernum, SDL_Renderer* rend)
 {
-
     for (int i = 0; i < usernum-1; i++)
     {
+        SDL_RenderClear(rend);
         int min_idx = i;
         for (int j = i+1; j < usernum; j++)
         {
+            SDL_SetRenderDrawColor(rend, 0, 0, 0 , 255);
+            SDL_RenderClear(rend);
+            for(int k = 0; k < usernum; k++)
+            {
+                SDL_SetRenderDrawColor(rend, 255, 255, 255, 255);
+                SDL_RenderFillRect(rend, &rects[k]);
+            }
+            SDL_SetRenderDrawColor(rend, 0, 128, 0, 255);
+            SDL_RenderFillRect(rend, &rects[i - 1]);
+            SDL_SetRenderDrawColor(rend, 255, 0, 0, 255);
+            SDL_RenderFillRect(rend, &rects[j]);
+            SDL_RenderPresent(rend);
             if (rects[j].h < rects[min_idx].h)
             {
                 min_idx = j;
             }
+            usleep(10000);
         }
         swap(&rects[min_idx].h, &rects[i].h);
         swap(&rects[min_idx].y, &rects[i].y);
+        usleep(100000);
     }
 
 }
@@ -119,9 +145,10 @@ int main (int argc, char* argv[])
 
         if (sort == 1)
         {
-            if (strcmp(sorttype, "selectionsort") == 0)
+            printf("seleciton");
+            if (strcmp(sorttype, "selection") == 0)
             {
-                selectionsort(rects, usernum);
+                selectionsort(rects, usernum, rend);
             }
 
             if (check(rects, usernum) == false)
