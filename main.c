@@ -36,7 +36,7 @@ void drawrects(SDL_Rect rects[], SDL_Renderer* rend, int i, int j)
 
 void bubblesort(SDL_Rect rects[], SDL_Renderer* rend)
 {
-    int sleeptime = 10000;
+    int sleeptime = 2000;
     for (int i = 0; i < usernum - 1; i++)
     {
         for(int j = 0; j < usernum - i - 1; j++)
@@ -49,6 +49,7 @@ void bubblesort(SDL_Rect rects[], SDL_Renderer* rend)
             drawrects(rects, rend, j, j);
             usleep(sleeptime);
         }
+        usleep(sleeptime * 3);
     }
 }
 
