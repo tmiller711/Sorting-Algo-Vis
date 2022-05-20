@@ -27,15 +27,16 @@ void drawrects(SDL_Rect rects[], SDL_Renderer* rend, int i, int j)
         SDL_SetRenderDrawColor(rend, 255, 255, 255, 255);
         SDL_RenderFillRect(rend, &rects[k]);
     }
-    SDL_SetRenderDrawColor(rend, 0, 128, 0, 255);
-    SDL_RenderFillRect(rend, &rects[i - 1]);
     SDL_SetRenderDrawColor(rend, 255, 0, 0, 255);
+    SDL_RenderFillRect(rend, &rects[i - 1]);
+    SDL_SetRenderDrawColor(rend, 0, 128, 0, 255);
     SDL_RenderFillRect(rend, &rects[j]);
     SDL_RenderPresent(rend);
 }
 
 void bubblesort(SDL_Rect rects[], SDL_Renderer* rend)
 {
+    int sleeptime = 10000;
     for (int i = 0; i < usernum - 1; i++)
     {
         for(int j = 0; j < usernum - i - 1; j++)
@@ -46,7 +47,7 @@ void bubblesort(SDL_Rect rects[], SDL_Renderer* rend)
                 swap(&rects[j].y, &rects[j + 1].y);
             }
             drawrects(rects, rend, j, j);
-            usleep(10000);
+            usleep(sleeptime);
         }
     }
 }
@@ -55,26 +56,27 @@ void bubblesort(SDL_Rect rects[], SDL_Renderer* rend)
 // selection sort, bubble sort, insertion sort
 void selectionsort(SDL_Rect rects[], SDL_Renderer* rend)
 {
-    for (int i = 0; i < usernum-1; i++)
+    int sleeptime = 1000;
+    for (int i = 0; i < usernum; i++)
     {
         SDL_RenderClear(rend);
         int min_idx = i;
-        for (int j = i+1; j < usernum; j++)
+        for (int j = i; j < usernum; j++)
         {
-            drawrects(rects, rend, i, j);
+            drawrects(rects, rend, i + 1, j);
             if (rects[j].h < rects[min_idx].h)
             {
                 min_idx = j;
             }
-            usleep(5000);
+            usleep(sleeptime);
         }
         swap(&rects[min_idx].h, &rects[i].h);
         swap(&rects[min_idx].y, &rects[i].y);
-        usleep(100000);
+        usleep(sleeptime * 3);
     }
 }
 
-bool check(SDL_Rect rects[])
+bool check(SDL_Rect rects[], SDL_Renderer* rend)
 {
     for (int i = 0; i < usernum; i++)
     {
@@ -82,6 +84,10 @@ bool check(SDL_Rect rects[])
         {
             return false;
         }
+        SDL_SetRenderDrawColor(rend, 0, 128, 0, 255);
+        SDL_RenderFillRect(rend, &rects[i]);
+        SDL_RenderPresent(rend);
+        usleep(10000);
     }
     return true;
 }
@@ -182,7 +188,7 @@ int main (int argc, char* argv[])
             else if (strcmp(sorttype, "bubble") == 0)
                 bubblesort(rects, rend);
 
-            if (check(rects) == false)
+            if (check(rects, rend) == false)
                 printf("Sorting failed with: %s\n", sorttype);
             pthread_join(id, NULL);
             sort = 0;
