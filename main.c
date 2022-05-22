@@ -34,6 +34,77 @@ void drawrects(SDL_Rect rects[], SDL_Renderer* rend, int i, int j)
     SDL_RenderPresent(rend);
 }
 
+void mergelists(SDL_Rect rects[], SDL_Renderer* rend, int l, int m, int r)
+{
+    int n1 = m - l + 1;
+	int n2 = r - m;
+
+	/* create temp arrays */
+	int L[n1], R[n2];
+
+	/* Copy data to temp arrays L[] and R[] */
+	for (int i = 0; i < n1; i++)
+		L[i] = rects[l + i].h;
+	for (int j = 0; j < n2; j++)
+		R[j] = rects[m + 1 + j].h;
+
+	/* Merge the temp arrays back into arr[l..r]*/
+	int i = 0; // Initial index of first subarray
+	int j = 0; // Initial index of second subarray
+	int k = l; // Initial index of merged subarray
+	while (i < n1 && j < n2) {
+		if (L[i] <= R[j]) {
+			rects[k].h = L[i];
+			i++;
+		}
+		else {
+			rects[k].h = R[j];
+			j++;
+		}
+		k++;
+	}
+
+	/* Copy the remaining elements of L[], if there
+	are any */
+	while (i < n1) {
+		rects[k].h = L[i];
+		i++;
+		k++;
+	}
+
+	/* Copy the remaining elements of R[], if there
+	are any */
+	while (j < n2) {
+		rects[k].h = R[j];
+		j++;
+		k++;
+	}
+
+    // need to redo the y values because they got messed up
+    for (int i = 0; i < usernum; i++)
+    {
+        rects[i].y = WIN_H - rects[i].h;
+    }
+    drawrects(rects, rend, k, -1);
+    usleep(70000);
+}
+
+void mergesort(SDL_Rect rects[], SDL_Renderer* rend, int l, int r)
+{
+    if (l < r) 
+    {
+        // Same as (l+r)/2, but avoids overflow for
+        // large l and h
+        // gets middle of list
+        int m = l + (r - l) / 2;
+  
+        // Sort first and second halves
+        mergesort(rects, rend, l, m);
+        mergesort(rects, rend, m + 1, r);
+        mergelists(rects, rend, l, m, r);
+    }
+}
+
 void bubblesort(SDL_Rect rects[], SDL_Renderer* rend)
 {
     int sleeptime = 2000;
@@ -188,9 +259,12 @@ int main (int argc, char* argv[])
                 selectionsort(rects, rend);
             else if (strcmp(sorttype, "bubble") == 0)
                 bubblesort(rects, rend);
+            else if (strcmp(sorttype, "merge") == 0)
+                mergesort(rects, rend, 0, usernum - 1);
 
             if (check(rects, rend) == false)
                 printf("Sorting failed with: %s\n", sorttype);
+
             pthread_join(id, NULL);
             sort = 0;
         }
