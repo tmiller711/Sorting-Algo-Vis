@@ -20,7 +20,7 @@ void swap(int *a, int *b)
 
 void drawrects(SDL_Rect rects[], SDL_Renderer* rend, int i, int j)
 {
-    SDL_SetRenderDrawColor(rend, 0, 0, 0 , 255);
+    SDL_SetRenderDrawColor(rend, 0, 0, 0, 255);
     SDL_RenderClear(rend);
     for(int k = 0; k < usernum; k++)
     {
@@ -31,6 +31,24 @@ void drawrects(SDL_Rect rects[], SDL_Renderer* rend, int i, int j)
     SDL_RenderFillRect(rend, &rects[i - 1]);
     SDL_SetRenderDrawColor(rend, 0, 128, 0, 255);
     SDL_RenderFillRect(rend, &rects[j]);
+    SDL_RenderPresent(rend);
+}
+
+void mergehalves(SDL_Rect rects[], SDL_Renderer* rend, int len)
+{
+	SDL_SetRenderDrawColor(rend, 0, 0, 0, 255);
+    SDL_RenderClear(rend);
+    for(int k = 0; k < usernum; k++)
+    {
+        SDL_SetRenderDrawColor(rend, 255, 255, 255, 255);
+        SDL_RenderFillRect(rend, &rects[k]);
+    }
+	for (int i = 0; i < len; i++) {
+		SDL_SetRenderDrawColor(rend, 0, 128, 0, 255);
+		SDL_RenderFillRect(rend, &rects[i]);
+	}
+    SDL_SetRenderDrawColor(rend, 255, 0, 0, 255);
+    SDL_RenderFillRect(rend, &rects[len - 1]);
     SDL_RenderPresent(rend);
 }
 
@@ -85,7 +103,9 @@ void mergelists(SDL_Rect rects[], SDL_Renderer* rend, int l, int m, int r)
     {
         rects[i].y = WIN_H - rects[i].h;
     }
-    drawrects(rects, rend, k, -1);
+//    drawrects(rects, rend, k, -1);
+	// draw the merging of the two lists here
+	mergehalves(rects, rend, k);
     usleep(70000);
 }
 
@@ -150,17 +170,17 @@ void selectionsort(SDL_Rect rects[], SDL_Renderer* rend)
 
 bool check(SDL_Rect rects[], SDL_Renderer* rend)
 {
-    for (int i = 0; i < usernum; i++)
+	SDL_SetRenderDrawColor(rend, 0, 0, 0, 255);
+    SDL_RenderClear(rend);
+    for(int k = 0; k < usernum; k++)
     {
-        if (rects[i].h < rects[i-1].h)
-        {
-            return false;
-        }
+		if (rects[k].h < rects[k-1].h) {
+			return false;
+		}
         SDL_SetRenderDrawColor(rend, 0, 128, 0, 255);
-        SDL_RenderFillRect(rend, &rects[i]);
-        SDL_RenderPresent(rend);
-        usleep(10000);
+        SDL_RenderFillRect(rend, &rects[k]);
     }
+    SDL_RenderPresent(rend);
     return true;
 }
 
@@ -261,20 +281,22 @@ int main (int argc, char* argv[])
                 bubblesort(rects, rend);
             else if (strcmp(sorttype, "merge") == 0)
                 mergesort(rects, rend, 0, usernum - 1);
+				printf("done");
 
-            if (check(rects, rend) == false)
+			if (check(rects, rend) == false)
                 printf("Sorting failed with: %s\n", sorttype);
 
             pthread_join(id, NULL);
-            sort = 0;
+            //sort = 0;
         }
 
-
-        for (int i = 0; i < usernum; i++)
-        {
-            SDL_SetRenderDrawColor(rend, 255, 255, 255, 255);
-            SDL_RenderFillRect(rend, &rects[i]);
-        }
+		if (sort == 0) {
+				for (int i = 0; i < usernum; i++)
+				{
+					SDL_SetRenderDrawColor(rend, 255, 255, 255, 255);
+					SDL_RenderFillRect(rend, &rects[i]);
+				}
+		}
 
         SDL_RenderPresent(rend);
 
