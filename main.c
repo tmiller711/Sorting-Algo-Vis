@@ -172,21 +172,37 @@ void selectionsort(SDL_Rect rects[], SDL_Renderer* rend)
     }
 }
 
-bool check(SDL_Rect rects[], SDL_Renderer* rend)
+void check2(SDL_Rect rects[], SDL_Renderer* rend, int k)
 {
 	SDL_SetRenderDrawColor(rend, 0, 0, 0, 255);
     SDL_RenderClear(rend);
     for(int k = 0; k < usernum; k++)
     {
+        SDL_SetRenderDrawColor(rend, 255, 255, 255, 255);
+        SDL_RenderFillRect(rend, &rects[k]);
+    }
+
+	SDL_SetRenderDrawColor(rend, 0, 128, 0, 255);
+	for (int i = 0; i < k+1; i++) {
+		SDL_RenderFillRect(rend, &rects[i]);
+	}
+
+    SDL_RenderPresent(rend);
+}
+
+bool check(SDL_Rect rects[], SDL_Renderer* rend)
+{
+    for(int k = 0; k < usernum; k++)
+    {
 		if (rects[k].h < rects[k-1].h) {
 			return false;
 		}
-        SDL_SetRenderDrawColor(rend, 0, 128, 0, 255);
-        SDL_RenderFillRect(rend, &rects[k]);
+		check2(rects, rend, k);
+		SDL_Delay(30);
     }
-    SDL_RenderPresent(rend);
     return true;
 }
+
 
 void shuffle(SDL_Rect rects[], int n)
 {
