@@ -34,7 +34,7 @@ void drawrects(SDL_Rect rects[], SDL_Renderer* rend, int i, int j)
     SDL_RenderPresent(rend);
 }
 
-void mergehalves(SDL_Rect rects[], SDL_Renderer* rend, int len)
+void drawmerge(SDL_Rect rects[], SDL_Renderer* rend, int len, int l1, int r1)
 {
 	SDL_SetRenderDrawColor(rend, 0, 0, 0, 255);
     SDL_RenderClear(rend);
@@ -43,20 +43,27 @@ void mergehalves(SDL_Rect rects[], SDL_Renderer* rend, int len)
         SDL_SetRenderDrawColor(rend, 255, 255, 255, 255);
         SDL_RenderFillRect(rend, &rects[k]);
     }
-	for (int i = 0; i < len; i++) {
-		SDL_SetRenderDrawColor(rend, 0, 128, 0, 255);
-		SDL_RenderFillRect(rend, &rects[i]);
-	}
-    SDL_SetRenderDrawColor(rend, 255, 0, 0, 255);
-    SDL_RenderFillRect(rend, &rects[len - 1]);
+	SDL_SetRenderDrawColor(rend, 0, 128, 0, 255);
+	SDL_RenderFillRect(rend, &rects[l1]);
+	SDL_RenderFillRect(rend, &rects[r1]);
+
     SDL_RenderPresent(rend);
 }
 
 void mergelists(SDL_Rect rects[], SDL_Renderer* rend, int l, int m, int r)
 {
+	// draw the line going through both halves at the same time
     int n1 = m - l + 1;
 	int n2 = r - m;
 
+	int l1 = l;
+	int r1 = r-m+l;
+	for (int i = 0; i < r-m; i++){
+		drawmerge(rects, rend, 0, l1, r1);
+		l1++;
+		r1++;
+	SDL_Delay(100);
+	}
 	/* create temp arrays */
 	int L[n1], R[n2];
 
@@ -73,10 +80,12 @@ void mergelists(SDL_Rect rects[], SDL_Renderer* rend, int l, int m, int r)
 	while (i < n1 && j < n2) {
 		if (L[i] <= R[j]) {
 			rects[k].h = L[i];
+			rects[k].y = WIN_H - L[i];
 			i++;
 		}
 		else {
 			rects[k].h = R[j];
+			rects[k].y = WIN_H - R[j];
 			j++;
 		}
 		k++;
@@ -86,6 +95,7 @@ void mergelists(SDL_Rect rects[], SDL_Renderer* rend, int l, int m, int r)
 	are any */
 	while (i < n1) {
 		rects[k].h = L[i];
+		rects[k].y = WIN_H - L[i];
 		i++;
 		k++;
 	}
@@ -94,19 +104,13 @@ void mergelists(SDL_Rect rects[], SDL_Renderer* rend, int l, int m, int r)
 	are any */
 	while (j < n2) {
 		rects[k].h = R[j];
+		rects[k].y = WIN_H - R[j];
 		j++;
 		k++;
 	}
 
-    // need to redo the y values because they got messed up
-    for (int i = 0; i < usernum; i++)
-    {
-        rects[i].y = WIN_H - rects[i].h;
-    }
-//    drawrects(rects, rend, k, -1);
-	// draw the merging of the two lists here
-	mergehalves(rects, rend, k);
-    usleep(70000);
+	drawmerge(rects, rend, 0, -1, -1);
+    usleep(99900);
 }
 
 void mergesort(SDL_Rect rects[], SDL_Renderer* rend, int l, int r)
