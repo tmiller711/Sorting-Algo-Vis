@@ -7,7 +7,7 @@
 #include <pthread.h>
 
 // game variables
-int WIN_W = 1000;
+int WIN_W = 1200;
 int WIN_H = 600;
 int usernum;
 
@@ -131,7 +131,7 @@ void mergesort(SDL_Rect rects[], SDL_Renderer* rend, int l, int r)
 
 void bubblesort(SDL_Rect rects[], SDL_Renderer* rend)
 {
-    int sleeptime = 2000;
+    int sleeptime = 250000/usernum;
     for (int i = 0; i < usernum - 1; i++)
     {
         for(int j = 0; j < usernum - i - 1; j++)
@@ -152,7 +152,7 @@ void bubblesort(SDL_Rect rects[], SDL_Renderer* rend)
 // selection sort, bubble sort, insertion sort
 void selectionsort(SDL_Rect rects[], SDL_Renderer* rend)
 {
-    int sleeptime = 1000;
+	int sleeptime = 100000/usernum;
     for (int i = 0; i < usernum; i++)
     {
         SDL_RenderClear(rend);
@@ -168,7 +168,7 @@ void selectionsort(SDL_Rect rects[], SDL_Renderer* rend)
         }
         swap(&rects[min_idx].h, &rects[i].h);
         swap(&rects[min_idx].y, &rects[i].y);
-        usleep(sleeptime * 3);
+        usleep(sleeptime*3);
     }
 }
 
@@ -197,8 +197,10 @@ bool check(SDL_Rect rects[], SDL_Renderer* rend)
 		if (rects[k].h < rects[k-1].h) {
 			return false;
 		}
+		// have to use separate function because SDL_RenderPresent
+		// bugs in a for loop
 		check2(rects, rend, k);
-		SDL_Delay(30);
+		SDL_Delay(800/usernum);
     }
     return true;
 }
@@ -233,6 +235,7 @@ int main (int argc, char* argv[])
     if (argc != 3)
     {
         printf("Usage = ./main NUM SORTTYPE\n");
+		printf("Sort Types: merge, bubble, selection\n");
         return 1;
     }
     usernum = atoi(argv[1]);
@@ -241,7 +244,10 @@ int main (int argc, char* argv[])
     {
         printf("Number must be divisible by 100\n");
         return 1;
-    }
+    } else if (usernum > 500) {
+		printf("Max number of blocks is 500\n");
+		return 1;
+	}
 
     SDL_Window* win;
     SDL_Renderer* rend;
@@ -252,9 +258,12 @@ int main (int argc, char* argv[])
 
     // create or rectangle array and populate all of them
     SDL_Rect rects[usernum];
-    int blockwidth = (WIN_W - (100*(usernum / 100)))/usernum;
-    int blockheight = WIN_H/usernum;
-    for (int i = 0, x = 0, h = blockheight; i < usernum; i++, x+=blockwidth + 1, h += blockheight)
+    float blockwidth = (float)(WIN_W - (100*(usernum / 100)))/usernum;
+    float blockheight = (float)WIN_H/usernum;
+	printf("%.6f", blockheight);
+	float x = 0;
+	float h = blockheight;
+    for (int i = 0; i < usernum; i++, x+=blockwidth + 1, h += blockheight)
     {
         rects[i].h = h;
         rects[i].w = blockwidth;
