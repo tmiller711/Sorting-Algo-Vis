@@ -62,7 +62,7 @@ void mergelists(SDL_Rect rects[], SDL_Renderer* rend, int l, int m, int r)
 		drawmerge(rects, rend, 0, l1, r1);
 		l1++;
 		r1++;
-	SDL_Delay(100);
+		SDL_Delay(100);
 	}
 	/* create temp arrays */
 	int L[n1], R[n2];
@@ -128,6 +128,41 @@ void mergesort(SDL_Rect rects[], SDL_Renderer* rend, int l, int r)
         mergelists(rects, rend, l, m, r);
     }
 }
+
+int partition (SDL_Rect rects[], SDL_Renderer* rend, int l, int r)
+{
+	int pIndex = l;
+	int pivot = rects[r].h;
+	int i;
+	for (i = l; i < r; i++)
+	{
+		drawrects(rects, rend, pIndex, -1);
+		if (rects[i].h < pivot)
+		{
+			swap(&rects[i].h, &rects[pIndex].h);
+			swap(&rects[i].y, &rects[pIndex].y);
+			drawrects(rects, rend, pIndex, i);
+			SDL_Delay(10000/usernum);
+			pIndex++;
+		}
+	}
+	swap(&rects[r].h, &rects[pIndex].h);
+	swap(&rects[r].y, &rects[pIndex].y);
+	SDL_Delay(5000/usernum);
+	return pIndex;
+}
+
+void quicksort(SDL_Rect rects[], SDL_Renderer* rend, int l, int r) 
+{
+	if (l >= r)
+		return;
+	
+	drawrects(rects, rend, -1, -1);
+	int pivot = l + (r-l)/2;
+	int index = partition(rects, rend, l, r);
+	quicksort(rects, rend, l, index - 1);
+	quicksort(rects, rend, index+1, r);
+}	
 
 void bubblesort(SDL_Rect rects[], SDL_Renderer* rend)
 {
@@ -235,7 +270,7 @@ int main (int argc, char* argv[])
     if (argc != 3)
     {
         printf("Usage = ./main NUM SORTTYPE\n");
-		printf("Sort Types: merge, bubble, selection\n");
+		printf("Sort Types: merge, quick, bubble, selection\n");
         return 1;
     }
     usernum = atoi(argv[1]);
@@ -260,7 +295,6 @@ int main (int argc, char* argv[])
     SDL_Rect rects[usernum];
     float blockwidth = (float)(WIN_W - (100*(usernum / 100)))/usernum;
     float blockheight = (float)WIN_H/usernum;
-	printf("%.6f", blockheight);
 	float x = 0;
 	float h = blockheight;
     for (int i = 0; i < usernum; i++, x+=blockwidth + 1, h += blockheight)
@@ -310,7 +344,8 @@ int main (int argc, char* argv[])
                 bubblesort(rects, rend);
             else if (strcmp(sorttype, "merge") == 0)
                 mergesort(rects, rend, 0, usernum - 1);
-				printf("done");
+			else if (strcmp(sorttype, "quick") == 0)
+				quicksort(rects, rend, 0, usernum - 1);
 
 			if (check(rects, rend) == false)
                 printf("Sorting failed with: %s\n", sorttype);
@@ -320,11 +355,11 @@ int main (int argc, char* argv[])
         }
 
 		if (sort == 0) {
-				for (int i = 0; i < usernum; i++)
-				{
-					SDL_SetRenderDrawColor(rend, 255, 255, 255, 255);
-					SDL_RenderFillRect(rend, &rects[i]);
-				}
+			for (int i = 0; i < usernum; i++)
+			{
+				SDL_SetRenderDrawColor(rend, 255, 255, 255, 255);
+				SDL_RenderFillRect(rend, &rects[i]);
+			}
 		}
 
         SDL_RenderPresent(rend);
